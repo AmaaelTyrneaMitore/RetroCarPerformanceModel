@@ -20,7 +20,7 @@ const { features, labels } = loadCSV(csvFilePath, loadOptions);
 
 // Create a Linear Regression model instance
 const regression = new LinearRegression(features, labels, {
-  learningRate: 0.001,
+  learningRate: 0.0001,
   iterations: 100,
 });
 
@@ -28,6 +28,7 @@ const regression = new LinearRegression(features, labels, {
 regression.train();
 
 // Display the updated values of slope (m) and intercept (b) after training
+const [b, m] = regression.weights.arraySync();
 console.log(
-  `\n\n[+] Updated value of m: ${regression.m}\n[+] Updated value of b: ${regression.b}\n\n`
+  `\n\n[+] Updated value of m: ${m}\n[+] Updated value of b: ${b}\n\n`
 );

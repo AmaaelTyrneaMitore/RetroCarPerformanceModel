@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import { tensor, ones, zeros } from '@tensorflow/tfjs-node';
 
 export default class LinearRegression {
   /**
-   * Constructs a Linear Regression model with given features, labels, and options.
+   * Constructs a Linear Regression model with tensors for features, labels, and weights.
    * @param {number[][]} features - Array of feature values for training.
    * @param {number[][]} labels - Array of label values for training.
    * @param {Object} [options={}] - Options for the linear regression model.
@@ -14,62 +14,52 @@ export default class LinearRegression {
     labels,
     options = { learningRate: 0.1, iterations: 1000 }
   ) {
-    this.features = features;
-    this.labels = labels;
+    // Convert arrays to tensors for features and labels
+    this.features = tensor(features);
+    this.labels = tensor(labels);
+
+    // Add a column of ones to features for intercept calculation
+    const onesColumn = ones([this.features.shape[0], 1]);
+    this.features = onesColumn.concat(this.features, 1);
+
     this.options = options;
-    this.m = 0; // Slope for the linear equation: y = mx + b
-    this.b = 0; // Intercept for the linear equation: y = mx + b
+
+    // Initialize weights tensor with zeros for coefficients (m and b)
+    this.weights = zeros([this.features.shape[1], 1]);
   }
 
   /**
-   * Performs gradient descent to update the slope (m) and intercept (b) values.
-   * Calculates the gradients for m & b and adjusts their values using the learning rate.
+   * Performs gradient descent using matrix operations to update weights.
+   * Calculates gradients for weights and adjusts them using the learning rate.
    */
   gradientDescent() {
     /*
-     * Both equations determining slopes regarding 'm' and 'b' (representing d(MSE)/db and d(MSE)/dm respectively)
-     * incorporate the term 'mx + b,' which denotes our present prediction for MPG. To streamline calculations,
-     * I'll employ a two-step process. Firstly, I'll iterate through our diverse feature variables (x) to compute 'mx + b.'
-     * Subsequently, having an array of these current MPG estimations, the second step involves seamlessly constructing both equations.
+     * With the newly optimized approach employing vectorized solutions using TFJS, instead of computing
+     * two gradients (slopes for MSE) with respect to 'm' and 'b' separately through distinct equations,
+     * I'll adopt a more efficient method utilizing matrix multiplication. This advanced technique condenses
+     * the process into a single equation, namely (Features * ((Features * Weights) - Labels)) / n.
+     * Utilizing this streamlined equation, I'll compute the slopes of MSE with respect to 'm' and 'b'.
      */
 
-    // Calculate current predictions for MPG based on the current slope and intercept values
-    const currentPredictionsForMPG = this.features.map((featureRow) => {
-      return this.m * featureRow[0] + this.b;
-    });
+    // Calculate current predictions (Features * Weights) for labels based on the current weights
+    const currentPredictions = this.features.matMul(this.weights);
 
-    // Calculate the gradient (slope) with respect to the intercept (b)
-    const bSlope =
-      (_.sum(
-        currentPredictionsForMPG.map((currentPrediction, i) => {
-          // Difference between predicted MPG and actual MPG
-          return currentPrediction - this.labels[i][0];
-        })
-      ) *
-        2) /
-      this.features.length;
+    // Compute differences between predicted labels and actual labels
+    const differences = currentPredictions.sub(this.labels);
 
-    // Calculate the gradient (slope) with respect to the slope (m)
-    const mSlope =
-      (_.sum(
-        currentPredictionsForMPG.map((currentPrediction, i) => {
-          // Product of feature and the difference between predicted and actual MPG
-          return (
-            -1 * this.features[i][0] * (this.labels[i][0] - currentPrediction)
-          );
-        })
-      ) *
-        2) /
-      this.features.length;
+    // Calculate gradients (slopes of MSE) by matrix operations
+    const gradients = this.features
+      .transpose()
+      .matMul(differences)
+      .div(this.features.shape[0]); // Divide by the number of observations
 
-    // Update the slope (m) and intercept (b) using the calculated gradients and learning rate
-    this.m -= mSlope * this.options.learningRate;
-    this.b -= bSlope * this.options.learningRate;
+    // Update weights using the calculated gradients and learning rate
+    this.weights = this.weights.sub(gradients.mul(this.options.learningRate));
   }
 
   /**
    * Trains the linear regression model using gradient descent.
-   * Executes gradient descent iteratively to find optimal values for slope and intercept.
+   * Executes gradient descent iteratively to optimize weights for the model.
    */
   train() {
     for (let i = 0; i < this.options.iterations; i++) {
