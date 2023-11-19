@@ -1,5 +1,6 @@
 import { join } from 'path';
 import appRootPath from 'app-root-path';
+import plot from 'node-remote-plot';
 
 import loadCSV from './utils/csv-loader.js';
 import LinearRegression from './models/linear-regression.js';
@@ -23,7 +24,7 @@ const { features, labels, testFeatures, testLabels } = loadCSV(
 
 // Create a Linear Regression model instance
 const regression = new LinearRegression(features, labels, {
-  learningRate: 10,
+  learningRate: 0.1,
   iterations: 100,
 });
 
@@ -32,6 +33,15 @@ regression.train();
 
 // Test the model and calculate R2 (coefficient of determination)
 const r2 = regression.test(testFeatures, testLabels);
+
+// Plotting MSE Values
+plot({
+  x: regression.MSEHistory.reverse(),
+  name: 'data/mse_history',
+  title: 'MSE History',
+  xLabel: 'No. of Iteration #',
+  yLabel: 'Mean Squared Error',
+});
 
 // Display the calculated R2
 console.log(`\n\n[+] R2: ${r2}\n\n`);
