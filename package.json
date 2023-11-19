@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "RetroCarPerformanceModel utilizes Node.js & TensorFlow.js to explore vintage car data from the 1970s era, predicting fuel efficiency (MPG) based on horsepower using linear regression. A learning project aimed at honing ML skills with real-world classic automobile datasets.",
   "main": "src/app.js",
+  "type": "module",
   "scripts": {
     "start": "./node_modules/nodemon/bin/nodemon.js ./src/app.js"
   },
