@@ -1,0 +1,53 @@
+{
+  "name": "retrocarperformancemodel",
+  "version": "1.0.0",
+  "description": "RetroCarPerformanceModel utilizes Node.js & TensorFlow.js to explore vintage car data from the 1970s era, predicting fuel efficiency (MPG) based on horsepower using linear regression. A learning project aimed at honing ML skills with real-world classic automobile datasets.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "./node_modules/nodemon/bin/nodemon.js ./src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AmaaelTyrneaMitore/RetroCarPerformanceModel.git"
+  },
+  "keywords": [
+    "machine-learning",
+    "retro",
+    "vintage-cars",
+    "linear-regression",
+    "nodejs",
+    "tensorflow",
+    "data-analysis",
+    "data-science",
+    "regression-analysis",
+    "data-preprocessing",
+    "predictive-modeling",
+    "npm-package",
+    "automotive",
+    "classic-cars",
+    "70s-era",
+    "artificial-intelligence",
+    "ml-models",
+    "gradient-descent",
+    "model-training",
+    "model-evaluation",
+    "feature-engineering",
+    "statistics",
+    "javascript",
+    "data-visualization",
+    "open-source"
+  ],
+  "author": "Shashank Singh",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/AmaaelTyrneaMitore/RetroCarPerformanceModel/issues"
+  },
+  "homepage": "https://github.com/AmaaelTyrneaMitore/RetroCarPerformanceModel#readme",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "shuffle-seed": "^1.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
