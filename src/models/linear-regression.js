@@ -66,4 +66,35 @@ export default class LinearRegression {
       this.gradientDescent();
     }
   }
+
+  /**
+   * Test the trained linear regression model's accuracy using test data.
+   * Calculates the coefficient of determination (R^2) for the model.
+   * @param {number[][]} testFeatures - Array of feature values for testing.
+   * @param {number[][]} testLabels - Array of label values for testing.
+   * @returns {number} - Coefficient of determination (R^2) indicating the model's accuracy.
+   */
+  test(testFeatures, testLabels) {
+    // Convert test arrays to TensorFlow tensors
+    testFeatures = tensor(testFeatures);
+    testLabels = tensor(testLabels);
+
+    // Add a column of ones to testFeatures for intercept calculation
+    const onesColumn = ones([testFeatures.shape[0], 1]);
+    testFeatures = onesColumn.concat(testFeatures, 1);
+
+    // Predict labels using the trained model
+    const predictions = testFeatures.matMul(this.weights);
+
+    // Calculate sum of squares of residuals (S_res)
+    const S_res = testLabels.sub(predictions).pow(2).sum().arraySync();
+
+    // Calculate total sum of squares (S_total)
+    const S_total = testLabels.sub(testLabels.mean()).pow(2).sum().arraySync();
+
+    // Calculate and return coefficient of determination (R^2)
+    const coefficientOfDetermination = 1 - S_res / S_total;
+
+    return coefficientOfDetermination;
+  }
 }

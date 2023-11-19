@@ -16,7 +16,10 @@ const loadOptions = {
 };
 
 // Load the CSV data using the provided options
-const { features, labels } = loadCSV(csvFilePath, loadOptions);
+const { features, labels, testFeatures, testLabels } = loadCSV(
+  csvFilePath,
+  loadOptions
+);
 
 // Create a Linear Regression model instance
 const regression = new LinearRegression(features, labels, {
@@ -27,8 +30,8 @@ const regression = new LinearRegression(features, labels, {
 // Train the regression model using gradient descent
 regression.train();
 
-// Display the updated values of slope (m) and intercept (b) after training
-const [b, m] = regression.weights.arraySync();
-console.log(
-  `\n\n[+] Updated value of m: ${m}\n[+] Updated value of b: ${b}\n\n`
-);
+// Test the model and calculate R2 (coefficient of determination)
+const r2 = regression.test(testFeatures, testLabels);
+
+// Display the calculated R2
+console.log(`\n\n[+] R2: ${r2}\n\n`);
