@@ -9,7 +9,7 @@ const csvFilePath = join(appRootPath.path, 'data', 'vintage_cars_data.csv');
 
 // Define options for loading CSV data
 const loadOptions = {
-  dataColumns: ['horsepower'],
+  dataColumns: ['horsepower', 'weight', 'displacement'],
   labelColumns: ['mpg'],
   shuffle: true,
   splitTest: 50,
@@ -23,7 +23,7 @@ const { features, labels, testFeatures, testLabels } = loadCSV(
 
 // Create a Linear Regression model instance
 const regression = new LinearRegression(features, labels, {
-  learningRate: 1,
+  learningRate: 0.1,
   iterations: 100,
 });
 
