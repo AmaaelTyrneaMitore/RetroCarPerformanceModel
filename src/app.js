@@ -23,7 +23,7 @@ const { features, labels, testFeatures, testLabels } = loadCSV(
 
 // Create a Linear Regression model instance
 const regression = new LinearRegression(features, labels, {
-  learningRate: 0.0001,
+  learningRate: 1,
   iterations: 100,
 });
 
