@@ -17,32 +17,28 @@ const loadOptions = {
 };
 
 // Load the CSV data using the provided options
-const { features, labels, testFeatures, testLabels } = loadCSV(
-  csvFilePath,
-  loadOptions
-);
+const { features, labels, testFeatures, testLabels } = loadCSV(csvFilePath, loadOptions);
 
 // Create a Linear Regression model instance
-const regression = new LinearRegression(features, labels, {
+const regressionModel = new LinearRegression(features, labels, {
   learningRate: 0.1,
   iterations: 3,
   batchSize: 10,
 });
 
 // Train the regression model using gradient descent
-regression.train();
-
-// Test the model and calculate R2 (coefficient of determination)
-const r2 = regression.test(testFeatures, testLabels);
+regressionModel.train();
 
 // Plotting MSE Values
 plot({
-  x: regression.MSEHistory.reverse(),
+  x: regressionModel.MSEHistory.reverse(),
   name: 'data/mse_history',
   title: 'MSE History',
   xLabel: 'No. of Iteration #',
   yLabel: 'Mean Squared Error',
 });
 
-// Display the calculated R2
-console.log(`\n\n[+] R2: ${r2}\n\n`);
+// Making a prediction based on the trained model
+const newObservations = [[120, 2, 380]]; // Example new observations for prediction
+const predictedMPG = regressionModel.predict(newObservations);
+predictedMPG.print();

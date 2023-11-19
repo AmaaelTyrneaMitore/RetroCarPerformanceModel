@@ -171,4 +171,19 @@ export default class LinearRegression {
       this.options.learningRate *= 1.05; // Increase learning rate by 5% if MSE decreased
     }
   }
+
+  /**
+   * Predicts the label values for a new set of observations.
+   * @param {number[][]} observations - Array of feature values for prediction.
+   * @returns {Tensor} - Tensor containing predicted label values.
+   */
+  predict(observations) {
+    // Process the provided observations to generate predictions
+    const processedObservations = this.processFeatures(observations);
+
+    // Calculate predicted values using current weights
+    const predictedLabels = processedObservations.matMul(this.weights);
+
+    return predictedLabels;
+  }
 }
