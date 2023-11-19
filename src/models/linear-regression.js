@@ -19,6 +19,7 @@ export default class LinearRegression {
     this.labels = tensor(labels);
 
     this.options = options;
+    this.MSEHistory = [];
 
     // Initialize weights tensor with zeros for coefficients (m and b)
     this.weights = zeros([this.features.shape[1], 1]);
@@ -60,6 +61,8 @@ export default class LinearRegression {
   train() {
     for (let i = 0; i < this.options.iterations; i++) {
       this.gradientDescent();
+      this.recordMSE();
+      this.optimizeLearningRate();
     }
   }
 
@@ -124,5 +127,39 @@ export default class LinearRegression {
     this.variance = variance;
 
     return features.sub(mean).div(variance.pow(0.5));
+  }
+
+  /**
+   * Record the current value of Mean Squared Error (MSE).
+   * Calculates the MSE and adds it to the history.
+   */
+  recordMSE() {
+    // Calculate Mean Squared Error (MSE)
+    const MSE = this.features
+      .matMul(this.weights)
+      .sub(this.labels)
+      .pow(2)
+      .sum()
+      .div(this.features.shape[0])
+      .arraySync();
+
+    // Store the MSE in the history
+    this.MSEHistory.unshift(MSE);
+  }
+
+  /**
+   * Update the learning rate based on the MSE history.
+   * Adjusts the learning rate for optimization based on the MSE trend.
+   */
+  optimizeLearningRate() {
+    // Ensure enough MSE values are available for comparison
+    if (this.MSEHistory.length < 2) return;
+
+    // If MSE increased, decrease learning rate; else, increase it
+    if (this.MSEHistory[0] > this.MSEHistory[1]) {
+      this.options.learningRate /= 2; // Reduce learning rate by 50% if MSE increased
+    } else {
+      this.options.learningRate *= 1.05; // Increase learning rate by 5% if MSE decreased
+    }
   }
 }
