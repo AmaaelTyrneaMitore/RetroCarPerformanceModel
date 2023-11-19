@@ -1,4 +1,4 @@
-import { tensor, ones, zeros } from '@tensorflow/tfjs-node';
+import { tensor, ones, zeros, moments, Tensor } from '@tensorflow/tfjs-node';
 
 export default class LinearRegression {
   /**
@@ -15,12 +15,8 @@ export default class LinearRegression {
     options = { learningRate: 0.1, iterations: 1000 }
   ) {
     // Convert arrays to tensors for features and labels
-    this.features = tensor(features);
+    this.features = this.processFeatures(features);
     this.labels = tensor(labels);
-
-    // Add a column of ones to features for intercept calculation
-    const onesColumn = ones([this.features.shape[0], 1]);
-    this.features = onesColumn.concat(this.features, 1);
 
     this.options = options;
 
@@ -76,12 +72,8 @@ export default class LinearRegression {
    */
   test(testFeatures, testLabels) {
     // Convert test arrays to TensorFlow tensors
-    testFeatures = tensor(testFeatures);
+    testFeatures = this.processFeatures(testFeatures);
     testLabels = tensor(testLabels);
-
-    // Add a column of ones to testFeatures for intercept calculation
-    const onesColumn = ones([testFeatures.shape[0], 1]);
-    testFeatures = onesColumn.concat(testFeatures, 1);
 
     // Predict labels using the trained model
     const predictions = testFeatures.matMul(this.weights);
@@ -96,5 +88,41 @@ export default class LinearRegression {
     const coefficientOfDetermination = 1 - S_res / S_total;
 
     return coefficientOfDetermination;
+  }
+
+  /**
+   * Process the features by standardizing and adding a column of ones for intercept calculation.
+   * @param {number[][]} features - Array of feature values.
+   * @returns {Tensor} - Processed features tensor.
+   */
+  processFeatures(features) {
+    features = tensor(features);
+
+    if (this.mean && this.variance) {
+      features = features.sub(this.mean).div(this.variance.pow(0.5));
+    } else {
+      features = this.standardize(features);
+    }
+
+    // Add a column of ones to features for intercept calculation
+    const onesColumn = ones([features.shape[0], 1]);
+    features = onesColumn.concat(features, 1);
+
+    return features;
+  }
+
+  /**
+   * Helper function to standardize the features.
+   * @param {Tensor} features - TensorFlow tensor of feature values.
+   * @returns {Tensor} - Standardized features tensor.
+   */
+  standardize(features) {
+    const { mean, variance } = moments(features, 0);
+
+    // Save mean and variance for later use
+    this.mean = mean;
+    this.variance = variance;
+
+    return features.sub(mean).div(variance.pow(0.5));
   }
 }
