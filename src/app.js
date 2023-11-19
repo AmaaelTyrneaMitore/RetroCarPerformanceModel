@@ -25,7 +25,8 @@ const { features, labels, testFeatures, testLabels } = loadCSV(
 // Create a Linear Regression model instance
 const regression = new LinearRegression(features, labels, {
   learningRate: 0.1,
-  iterations: 100,
+  iterations: 3,
+  batchSize: 10,
 });
 
 // Train the regression model using gradient descent

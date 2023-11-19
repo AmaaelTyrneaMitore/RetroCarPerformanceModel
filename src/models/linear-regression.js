@@ -9,11 +9,7 @@ export default class LinearRegression {
    * @param {number} [options.learningRate=0.1] - Learning rate for gradient descent.
    * @param {number} [options.iterations=1000] - Maximum number of iterations for gradient descent.
    */
-  constructor(
-    features,
-    labels,
-    options = { learningRate: 0.1, iterations: 1000 }
-  ) {
+  constructor(features, labels, options = { learningRate: 0.1, iterations: 1000, batchSize: 1 }) {
     // Convert arrays to tensors for features and labels
     this.features = this.processFeatures(features);
     this.labels = tensor(labels);
@@ -26,10 +22,11 @@ export default class LinearRegression {
   }
 
   /**
-   * Performs gradient descent using matrix operations to update weights.
-   * Calculates gradients for weights and adjusts them using the learning rate.
+   * Performs batch gradient descent to update weights based on the given features and labels.
+   * @param {Tensor} features - Tensor of feature values.
+   * @param {Tensor} labels - Tensor of label values.
    */
-  gradientDescent() {
+  gradientDescent(features, labels) {
     /*
      * With the newly optimized approach employing vectorized solutions using TFJS, instead of computing
      * two gradients (slopes for MSE) with respect to 'm' and 'b' separately through distinct equations,
@@ -39,28 +36,40 @@ export default class LinearRegression {
      */
 
     // Calculate current predictions (Features * Weights) for labels based on the current weights
-    const currentPredictions = this.features.matMul(this.weights);
+    const currentPredictions = features.matMul(this.weights);
 
     // Compute differences between predicted labels and actual labels
-    const differences = currentPredictions.sub(this.labels);
+    const differences = currentPredictions.sub(labels);
 
     // Calculate gradients (slopes of MSE) by matrix operations
-    const gradients = this.features
-      .transpose()
-      .matMul(differences)
-      .div(this.features.shape[0]); // Divide by the number of observations
+    const gradients = features.transpose().matMul(differences).div(features.shape[0]); // Divide by the number of observations
 
     // Update weights using the calculated gradients and learning rate
     this.weights = this.weights.sub(gradients.mul(this.options.learningRate));
   }
 
   /**
-   * Trains the linear regression model using gradient descent.
-   * Executes gradient descent iteratively to optimize weights for the model.
+   * Trains the linear regression model using batch gradient descent.
+   * Optimizes weights for the model through iterations and batch updates.
    */
   train() {
+    // Calculate the total number of batches that we are going to loop through when running gradientDescent()
+    const batchQuantity = Math.floor(this.features.shape[0] / this.options.batchSize);
+
     for (let i = 0; i < this.options.iterations; i++) {
-      this.gradientDescent();
+      for (let j = 0; j < batchQuantity; j++) {
+        const { batchSize } = this.options;
+        const startIndex = j * batchSize;
+
+        // Extract the current batch of features and labels for gradient descent
+        const featureSlice = this.features.slice([startIndex, 0], [batchSize, -1]);
+        const labelSlice = this.labels.slice([startIndex, 0], [batchSize, -1]);
+
+        // Run the gradient descent for the current batch of features and labels
+        this.gradientDescent(featureSlice, labelSlice);
+      }
+
+      // Record MSE and optimize learning rate after each epoch
       this.recordMSE();
       this.optimizeLearningRate();
     }
